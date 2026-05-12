@@ -36,6 +36,7 @@ class OrderController extends Controller
         // 4. Persistencia directa y falta de transacciones atómicas
         $order = Order::create([
             'user_id' => 1, // Hardcoded para el ejemplo
+            'product_id' => $product->id,
             'total_amount' => $total,
             'status' => 'pending'
         ]);
