@@ -2,49 +2,44 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\OrderData;
+use App\Http\Requests\StoreOrderRequest;
 use App\Models\Order;
 use App\Models\Product;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\JsonResponse;
 
 class OrderController extends Controller
 {
     /**
-     * MÉTODO LEGACY: Demostración de Deuda Técnica.
-     * Este método tiene demasiadas responsabilidades:
-     * Validación, Lógica de Negocio y Persistencia.
+     * Store a newly created order.
      */
-    public function store(Request $request) {
-        // 1. Validación manual (🚩 Debería ser un FormRequest)
-        $validator = Validator::make($request->all(), [
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1'
-        ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
+    public function store(StoreOrderRequest $request): JsonResponse {
+        // 1. Transformamos la Request en un Objeto de Datos (DTO)
+        $orderData = OrderData::fromRequest($request);
 
-        // 2. Lógica de negocio mezclada (🚩 Debería estar en una Action o Service)
+        // 2. Buscamos el producto usando el DTO
         $product = Product::find($request->product_id);
-        if ($product->stock < $request->quantity) {
-            return response()->json(['error' => 'No hay suficiente stock'], 422);
+
+        // 3. Lógica de negocio (Pronto la moveremos a un Service/Action)
+        if ($product->stock < $orderData->quantity) {
+            return response()->json([
+                'error' => 'No hay suficiente stock para completar la orden'
+            ], 422);
         }
 
-        // 3. Cálculos financieros frágiles (🚩 Debería ser un Value Object)
-        $total = $product->price * $request->quantity;
-
-        // 4. Persistencia directa y falta de transacciones atómicas
+        // 4. Persistencia
         $order = Order::create([
-            'user_id' => 1, // Hardcoded para el ejemplo
-            'product_id' => $product->id,
-            'total_amount' => $total,
+            'user_id' => $orderData->userId,
+            'product_id' => $orderData->productId,
+            'total_amount' => $product->price * $orderData->quantity,
             'status' => 'pending'
         ]);
 
-        // 5. Mutación de stock sin control de concurrencia
-        $product->decrement('stock', $request->quantity);
+        // 5. Actualización de stock (Efecto secundario)
+        $product->decrement('stock', $orderData->quantity);
+
         return response()->json([
-            'message' => 'Orden Creada',
+            'message' => 'Orden Creada con Éxito',
             'data' => $order
         ], 201);
     }
