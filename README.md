@@ -27,7 +27,8 @@ Este proyecto es una demostración de evolución arquitectónica en Laravel 13. 
 Para probar el endpoint de órdenes en la fase legacy:
 
 ```bash
-curl -X POST [http://127.0.0.1:8000/api/orders](http://127.0.0.1:8000/api/orders) \
+curl -X POST http://127.0.0.1:8000/api/orders \
      -H "Content-Type: application/json" \
+     -H "Accept: application/json" \
      -d '{"product_id": 1, "quantity": 2}'
 ```
