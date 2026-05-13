@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Actions\CreateOrderAction;
 use App\DTOs\OrderData;
 use App\Http\Requests\StoreOrderRequest;
-use App\Models\Order;
-use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 
 class OrderController extends Controller
