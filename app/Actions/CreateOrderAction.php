@@ -7,7 +7,6 @@ use App\Exceptions\InsufficientStockException;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class CreateOrderAction
 {
