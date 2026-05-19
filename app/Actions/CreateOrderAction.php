@@ -6,41 +6,41 @@ use App\DTOs\OrderData;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Order;
 use App\Models\Product;
+use App\Repositories\Contracts\OrderRepositoryInterface;
+use App\Repositories\Contracts\ProductRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
 class CreateOrderAction
 {
     /**
      * Create a new class instance.
+     * Inyectamos los contratos de los repositorios en el constructor.
+     * Laravel automáticamente resolverá las implementaciones de Eloquent.
      */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(
+        protected ProductRepositoryInterface $productRepository,
+        protected OrderRepositoryInterface $orderRepository
+    ) {}
 
     public function execute(OrderData $orderData): Order {
         // DB::transaction protege la integridad de tus datos
         return DB::transaction(function () use ($orderData) {
-            // lockForUpdate() bloquea la fila en la DB hasta que termine la transacción.
-            // Evita que dos personas compren el último producto al mismo tiempo.
-            // Buscamos el producto, con findOrFail para el manejo de errores.
-            $product = Product::lockForUpdate()->findOrFail($orderData->productId);
+            // Buscamos el producto delegando el bloqueo al repositorio
+            $product = $this->productRepository->findForUpdate($orderData->productId);
 
-            //Validamos si hay existencia del producto en el stock.
+            // Regla de negocio: Validación de stock
             if ($product->stock < $orderData->quantity) {
                 throw new InsufficientStockException("No hay stock suficiente para: {$product->name}");
             }
 
-            //Creamos la orden.
-            $order = Order::create([
-                'user_id' => $orderData->userId,
-                'product_id' => $orderData->productId,
-                'total_amount' => $product->price * $orderData->quantity,
-                'status' => 'pending'
-            ]);
+            // Calculamos el monto total en la capa de negocio
+            (float) $totalAmount = $product->price * $orderData->quantity;
 
-            //Actualizamos el stock
-            $product->decrement('stock', $orderData->quantity);
+            // Creamos la orden abstrayendo Eloquent
+            $order = $this->orderRepository->create($orderData, $totalAmount);
+
+            // Reducimos el stock usando el repositorio
+            $this->productRepository->decrementStock($product, $orderData->quantity);
 
             return $order;
         });
