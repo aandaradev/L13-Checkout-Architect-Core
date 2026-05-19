@@ -5,7 +5,6 @@ namespace App\Actions;
 use App\DTOs\OrderData;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Order;
-use App\Models\Product;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Repositories\Contracts\ProductRepositoryInterface;
 use Illuminate\Support\Facades\DB;
