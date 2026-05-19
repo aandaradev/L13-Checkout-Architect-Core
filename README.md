@@ -13,8 +13,12 @@ Este proyecto es una demostración de evolución arquitectónica en Laravel 13. 
   - [x] Manejo de excepciones personalizadas (`InsufficientStockException`).
   - [x] Implementación de **Transacciones de Base de Datos** (Atomicidad).
   - [x] Uso de **Locks** para evitar condiciones de carrera (Race Conditions).
-- [ ] **Fase 4: Desacoplamiento de Persistencia**
-  - [ ] Implementación del **Patrón Repositorio**.
+- [x] **Fase 4: Desacoplamiento de Persistencia**
+  - [x] Implementación del **Patrón Repositorio** (Principio de Inversión de Dependencias).
+  - [x] Creación de contratos (`ProductRepositoryInterface` y `OrderRepositoryInterface`) para aislar el dominio.
+  - [x] Desarrollo de implementaciones concretas con Eloquent (`EloquentProductRepository`, `EloquentOrderRepository`).
+  - [x] Uso de `RepositoryServiceProvider` para la inyección automática de dependencias en el contenedor IoC.
+  - [x] Refactorización completa de `CreateOrderAction` para operar únicamente a través de abstracciones, eliminando acoplamiento directo con el ORM.
 - [ ] **Fase 5: Eventos y Efectos Secundarios**
   - [ ] Sistema de notificaciones (Email/Slack) mediante **Eventos y Listeners**.
 
