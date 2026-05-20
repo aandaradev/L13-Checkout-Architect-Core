@@ -19,8 +19,11 @@ Este proyecto es una demostración de evolución arquitectónica en Laravel 13. 
   - [x] Desarrollo de implementaciones concretas con Eloquent (`EloquentProductRepository`, `EloquentOrderRepository`).
   - [x] Uso de `RepositoryServiceProvider` para la inyección automática de dependencias en el contenedor IoC.
   - [x] Refactorización completa de `CreateOrderAction` para operar únicamente a través de abstracciones, eliminando acoplamiento directo con el ORM.
-- [ ] **Fase 5: Eventos y Efectos Secundarios**
-  - [ ] Sistema de notificaciones (Email/Slack) mediante **Eventos y Listeners**.
+- [x] **Fase 5: Eventos y Efectos Secundarios (EDA)**
+  - [x] Diseño e implementación de la Arquitectura Orientada a Eventos para el desacoplamiento de procesos secundarios.
+  - [x] Creación del evento de dominio `OrderCreated` encargado de transportar el estado de la orden persistida.
+  - [x] Creación del Listener `SendOrderConfirmation` para gestionar de forma aislada la lógica de notificaciones mediante el sistema nativo de *Event Discovery* de Laravel 13.
+  - [x] Refactorización de `CreateOrderAction` para disparar el evento quirúrgicamente tras la transacción, respetando el Principio de Responsabilidad Única (SRP).
 
 ## 🛠️ Tecnologías
 
