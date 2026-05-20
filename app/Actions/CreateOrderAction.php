@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\DTOs\OrderData;
+use App\Events\OrderCreated;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Order;
 use App\Repositories\Contracts\OrderRepositoryInterface;
@@ -23,7 +24,7 @@ class CreateOrderAction
 
     public function execute(OrderData $orderData): Order {
         // DB::transaction protege la integridad de tus datos
-        return DB::transaction(function () use ($orderData) {
+        $orderCreated = DB::transaction(function () use ($orderData) {
             // Buscamos el producto delegando el bloqueo al repositorio
             $product = $this->productRepository->findForUpdate($orderData->productId);
 
@@ -43,5 +44,11 @@ class CreateOrderAction
 
             return $order;
         });
+
+        // Se dispara el evento aquí. 🚀
+        OrderCreated::dispatch($orderCreated);
+
+        // Se retorna la orden creada.
+        return $orderCreated;
     }
 }
