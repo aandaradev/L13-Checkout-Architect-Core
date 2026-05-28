@@ -24,6 +24,14 @@ Este proyecto es una demostración de evolución arquitectónica en Laravel 13. 
   - [x] Creación del evento de dominio `OrderCreated` encargado de transportar el estado de la orden persistida.
   - [x] Creación del Listener `SendOrderConfirmation` para gestionar de forma aislada la lógica de notificaciones mediante el sistema nativo de *Event Discovery* de Laravel 13.
   - [x] Refactorización de `CreateOrderAction` para disparar el evento quirúrgicamente tras la transacción, respetando el Principio de Responsabilidad Única (SRP).
+- [x] **Fase 6: Pruebas Automatizadas (Testing Suite)**
+  - [x] Diseño e implementación de pruebas unitarias puras y aisladas con PHPUnit para blindar la lógica de negocio sin depender de la base de datos física.
+  - [x] Simulación quirúrgica de contratos y dependencias utilizando los mecanismos nativos de *Mocking* de PHPUnit (`createMock`).
+  - [x] Cobertura total de los flujos del dominio:
+    - **Caso 1 (Éxito):** Verificación de creación de órdenes con montos correctos y disparo del evento de dominio `OrderCreated`.
+    - **Caso 2 (Excepción):** Interrupción controlada del flujo mediante el lanzamiento y aserción de la excepción `InsufficientStockException`.
+  - [x] Implementación de pruebas de integración HTTP (*Feature Tests*) para la validación perimetral de peticiones:
+    - **Caso 3 (Validación API):** Verificación del rechazo automático de payloads corruptos por parte de `StoreOrderRequest` con código de estado HTTP `422 Unprocessable Entity`.
 
 ## 🛠️ Tecnologías
 
@@ -72,4 +80,19 @@ curl -X POST http://127.0.0.1:8000/api/orders \
      -H "Content-Type: application/json" \
      -H "Accept: application/json" \
      -d '{"product_id": 999, "quantity": 0}'
+```
+
+### 🧪 Ejecución de la Suite de Pruebas Automatizadas (PHPUnit)
+
+Si en lugar de pruebas manuales con `curl` deseas ejecutar toda la batería de pruebas unitarias y de integración que blindan estos 3 casos, corre el siguiente comando en tu terminal:
+
+```bash
+# Ejecutar toda la suite (Unit + Feature)
+php artisan test
+
+# Filtrar por pruebas del núcleo de negocio (Casos 1 y 2)
+php artisan test --filter=CreateOrderActionTest
+
+# Filtrar por pruebas de validación HTTP (Caso 3)
+php artisan test --filter=OrderApiValidationTest
 ```
